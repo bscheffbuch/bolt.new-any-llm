@@ -82,12 +82,10 @@ export function getHuggingFaceModel(apiKey: OptionalApiKey, model: string) {
   return openai(model);
 }
 
-export function getOllamaModel(baseURL: string, model: string) {
+export function getOllamaModel(model: string) {
   const ollamaInstance = ollama(model, {
     numCtx: DEFAULT_NUM_CTX,
   }) as LanguageModelV1 & { config: any };
-
-  ollamaInstance.config.baseURL = `${baseURL}/api`;
 
   return ollamaInstance;
 }
@@ -157,6 +155,6 @@ export function getModel(provider: string, model: string, env: Env, apiKeys?: Re
     case 'Cohere':
       return getCohereAIModel(apiKey, model);
     default:
-      return getOllamaModel(baseURL, model);
+      return getOllamaModel(model);
   }
 }

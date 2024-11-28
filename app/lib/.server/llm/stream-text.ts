@@ -1,6 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck – TODO: Provider proper types
-
 import { convertToCoreMessages, streamText as _streamText } from 'ai';
 import { getModel } from '~/lib/.server/llm/model';
 import { MAX_TOKENS } from './constants';
@@ -32,7 +29,7 @@ function extractPropertiesFromMessage(message: Message): { model: string; provid
 
   // Extract provider
   const providerMatch = message.content.match(PROVIDER_REGEX);
-  const provider = providerMatch ? providerMatch[1] : DEFAULT_PROVIDER;
+  const provider = providerMatch ? providerMatch[1] : DEFAULT_PROVIDER.name;
 
   // Remove model and provider lines from content
   const cleanedContent = message.content.replace(MODEL_REGEX, '').replace(PROVIDER_REGEX, '').trim();
@@ -52,7 +49,7 @@ export function streamText(messages: Messages, env: Env, options?: StreamingOpti
         currentModel = model;
       }
 
-      currentProvider = provider;
+      currentProvider = PROVIDER_LIST.find((p) => p.name === provider) || DEFAULT_PROVIDER;
 
       return { ...message, content };
     }
@@ -65,7 +62,7 @@ export function streamText(messages: Messages, env: Env, options?: StreamingOpti
   const dynamicMaxTokens = modelDetails && modelDetails.maxTokenAllowed ? modelDetails.maxTokenAllowed : MAX_TOKENS;
 
   return _streamText({
-    model: getModel(currentProvider, currentModel, env, apiKeys),
+    model: getModel(currentProvider.name, currentModel, env, apiKeys),
     system: getSystemPrompt(),
     maxTokens: dynamicMaxTokens,
     messages: convertToCoreMessages(processedMessages),
